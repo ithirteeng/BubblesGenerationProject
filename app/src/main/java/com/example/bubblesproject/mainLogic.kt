@@ -1,6 +1,7 @@
 package com.example.bubblesproject
 
 import com.example.bubblesproject.databinding.ActivityMainBinding
+import java.nio.channels.FileLock
 import kotlin.math.*
 
 class MainLogic(
@@ -23,13 +24,14 @@ class MainLogic(
 
     fun move() {
         if (bubblesArray.isNotEmpty()) {
+            collision()
             for (bubble in bubblesArray) {
                 changeDirection(bubble)
                 bubble.view.y += getViewY(bubble.speed.toFloat(), bubble.angle)
                 bubble.view.x += getViewX(bubble.speed.toFloat(), bubble.angle)
-                //bubblesCollision()
 //                Log.e("CORDS", bubble.view.y.toString())
             }
+
         }
     }
 
@@ -104,46 +106,70 @@ class MainLogic(
         return anglesToCorrectForm(angle)
     }
 
-    private fun correctPhysicsForBubblesCollisions(firstBubble: Bubble, secondBubble: Bubble): Double {
-        val x1 = firstBubble.view.x
-        val y1 = firstBubble.view.y
-        val x2 = secondBubble.view.x
-        val y2 = secondBubble.view.y
+    private fun collision() {
+        for (i in 0 until bubblesArray.size - 1) {
+            for (j in i + 1 until bubblesArray.size) {
+                val distance = distanceBetweenBubbles(
+                    bubblesArray[i].view.x,
+                    bubblesArray[i].view.y,
+                    bubblesArray[j].view.x,
+                    bubblesArray[j].view.y
+                )
+                if (distance <= bubbleRadius * 2) {
+                    val pair = correctPhysicsForBubblesCollisions(bubblesArray[i], bubblesArray[j])
+                    bubblesArray[i].angle = pair.first
+                    bubblesArray[j].angle = pair.second
+                }
+            }
+        }
+    }
 
-        val firstCenter = centerCoordinates(x1, y1)
-        val secondCenter = centerCoordinates(x2, y2)
+    private fun correctPhysicsForBubblesCollisions(
+        firstBubble: Bubble,
+        secondBubble: Bubble
+    ): Pair<Double, Double> {
+        var x1 = firstBubble.view.x
+        var y1 = firstBubble.view.y
+        var x2 = secondBubble.view.x
+        var y2 = secondBubble.view.y
 
-        val touchCords = findTouchCoordinate(
-            firstCenter.first,
-            firstCenter.second,
-            secondCenter.first,
-            secondCenter.second
-        )
-        var firstAngle = getAngle(
-            touchCords.first,
-            touchCords.second,
-            firstCenter.first,
-            firstCenter.second,
-            firstBubble.speed
-        )
-        var secondAngle = getAngle(
-            touchCords.first,
-            touchCords.second,
-            secondCenter.first,
-            secondCenter.second,
-            secondBubble.speed
-        )
+
+        val touchCords = findTouchCoordinate(x1, y1, x2, y2)
+        val cathet = abs(touchCords.first - x1)
+        val angle = findRevertAngle(bubbleRadius.toDouble(), abs(cathet).toDouble())
+
+        var firstAngle = firstBubble.angle - angle
+        firstAngle - anglesToCorrectForm(firstAngle)
+        var secondAngle = secondBubble.angle - angle
+        secondAngle = anglesToCorrectForm(secondAngle)
+
+
+        if (x1 < x2) {
+            firstAngle = correctPhysicsForWalls(firstAngle, 0.0) + angle
+            secondAngle = correctPhysicsForWalls(secondAngle, 180.0) + angle
+            if (y2 > y1) {
+                val temp = firstAngle
+                firstAngle = secondAngle
+                secondAngle = temp
+            }
+        } else {
+            firstAngle = correctPhysicsForWalls(firstAngle, 180.0) + angle
+            secondAngle = correctPhysicsForWalls(secondAngle, 0.0) + angle
+            if (y1 >= y2) {
+                val temp = firstAngle
+                firstAngle = secondAngle
+                secondAngle = temp
+            }
+
+
+        }
+
 
         firstAngle = anglesToCorrectForm(firstAngle)
         secondAngle = anglesToCorrectForm(secondAngle)
 
-
-
-
-        firstAngle = anglesToCorrectForm(firstAngle)
-        return firstAngle
+        return Pair(firstAngle, secondAngle)
     }
-
 
     private fun findTouchCoordinate(
         x1: Float,
@@ -155,10 +181,6 @@ class MainLogic(
     }
 
 
-    private fun centerCoordinates(x: Float, y: Float): Pair<Float, Float> {
-        return Pair(x + bubbleRadius, y + bubbleRadius)
-    }
-
     private fun anglesToCorrectForm(angle: Double): Double {
         val temp = if (angle < 0.0) {
             -(angle - angle.toInt()) + abs((360 - angle) % 360)
@@ -166,6 +188,29 @@ class MainLogic(
             (angle - angle.toInt()) + abs(angle % 360)
         }
         return temp
+    }
+
+    private fun findRevertAngle(hypotenuse: Double, cathet: Double): Double {
+        val cosine = cathet / hypotenuse
+        val radAngle = acos(cosine)
+
+        return radAngle * 180 / PI
+    }
+
+    private fun ifAnglesReverse(firstAngle: Double, secondAngle: Double): Boolean {
+        return if (firstAngle in 90.0..270.0) {
+            secondAngle in 90.0..270.0
+        } else {
+            secondAngle <= 90.0 || secondAngle >= 270
+        }
+    }
+
+    private fun findEndAngle(x1: Float, y1: Float, x2: Float, y2: Float): Double {
+        val hypotenuse = distanceBetweenBubbles(x1, y1, x2, y2)
+        val cathet = y2 - y1
+        val sin = cathet / hypotenuse
+        val radAngle = asin(sin)
+        return (180 - radAngle * 180 / PI)
     }
 
     private fun getViewX(speed: Float, directionAngle: Double): Float {
@@ -176,12 +221,6 @@ class MainLogic(
         return speed * sin(angleInRadians(directionAngle))
     }
 
-
-    private fun getAngle(touchX: Float, touchY: Float, x: Float, y: Float, speed: Double): Double {
-        val cosine = distanceBetweenBubbles(touchX, touchY, x, y) / speed
-        val angle = acos(cosine)
-        return angle * 180.0 / PI
-    }
 
     private fun angleInRadians(angle: Double): Float {
         return ((-angle / 180) * PI).toFloat()
