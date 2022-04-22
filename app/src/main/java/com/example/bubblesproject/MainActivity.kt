@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val BUBBLE_WIDTH = 250
         const val BUBBLE_HEIGHT = 250
-        const val BUBBLE_AMOUNT = 16
+        const val BUBBLES_AMOUNT = 20
         const val DEFAULT_SPEED = 15
     }
 
@@ -24,6 +24,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bubblesArray: ArrayList<Bubble>
     private lateinit var logic: MainLogic
     private var canBeAdded = true
+    private val bubblesColorsArray = arrayListOf(
+        "bubble_blue",
+        "bubble_pink",
+        "bubble_violet"
+
+    )
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,7 +104,7 @@ class MainActivity : AppCompatActivity() {
         screenHeight: Int,
         screenWidth: Int
     ): Boolean {
-        if (bubblesArray.size != BUBBLE_AMOUNT) {
+        if (bubblesArray.size != BUBBLES_AMOUNT) {
             if (canBeCreated(motionEvent, BUBBLE_HEIGHT / 2, screenHeight, screenWidth)) {
                 var text = binding.bubblesCountView.text.toString().toInt()
                 text++
@@ -106,8 +112,10 @@ class MainActivity : AppCompatActivity() {
 
                 val x = motionEvent.x
                 val y = motionEvent.y
+
                 val image = ImageView(this)
-                image.setImageResource(R.drawable.circle)
+                val color = bubblesColorsArray[(0 until bubblesColorsArray.size).random()]
+                image.setImageResource(resources.getIdentifier(color, "drawable", packageName))
 
                 val bubble = Bubble(image, (0..359).random().toDouble(), DEFAULT_SPEED.toDouble())
 
@@ -119,7 +127,6 @@ class MainActivity : AppCompatActivity() {
 
                     }
                 }
-                //val listener = View.OnTouchListener()
                 bubblesArray.add(bubble)
             }
         } else {
