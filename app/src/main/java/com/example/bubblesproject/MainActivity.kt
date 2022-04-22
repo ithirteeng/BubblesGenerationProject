@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         const val BUBBLE_WIDTH = 250
         const val BUBBLE_HEIGHT = 250
         const val BUBBLE_AMOUNT = 16
-        const val DEFAULT_SPEED = 20
+        const val DEFAULT_SPEED = 15
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
                 screenWidth
             )
         }
-        logic = MainLogic(screenHeight, screenWidth, bubblesArray, BUBBLE_WIDTH / 2)
+        logic = MainLogic(screenHeight, screenWidth, bubblesArray, BUBBLE_WIDTH / 2, binding)
 
         moveBubbles()
     }
@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
             if (canBeAdded) {
                 Toast.makeText(
                     this,
-                    "You can't add more then $BUBBLE_AMOUNT bubbles",
+                    resources.getString(R.string.bubblesError),
                     Toast.LENGTH_SHORT
                 ).show()
                 canBeAdded = false

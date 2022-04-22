@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">bubblesProject</string>
     <string name="countView">0</string>
+    <string name="bubblesError">"You can't add more then $BUBBLE_AMOUNT bubbles"</string>
 </resources>
