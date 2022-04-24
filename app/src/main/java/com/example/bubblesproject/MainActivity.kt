@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity() {
                 val color = bubblesColorsArray[(0 until bubblesColorsArray.size).random()]
                 image.setImageResource(resources.getIdentifier(color, "drawable", packageName))
 
-                val bubble = Bubble(image, 0.0, DEFAULT_SPEED.toDouble())
+                val bubble = Bubble(image, (0..359).random().toDouble(), DEFAULT_SPEED.toDouble())
 
                 when (motionEvent.action) {
                     MotionEvent.ACTION_DOWN -> {
