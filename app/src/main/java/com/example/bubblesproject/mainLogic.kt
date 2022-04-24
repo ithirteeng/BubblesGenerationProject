@@ -143,23 +143,24 @@ class MainLogic(
         var secondAngle = secondBubble.angle - angle
         secondAngle = anglesToCorrectForm(secondAngle)
 
-
-        if (x1 < x2) {
+        if (y1 < y2) {
             firstAngle = correctPhysicsForWalls(firstAngle, 0.0) + angle
             secondAngle = correctPhysicsForWalls(secondAngle, 180.0) + angle
-            if (y2 > y1) {
-                val temp = firstAngle
-                firstAngle = secondAngle
-                secondAngle = temp
-            }
         } else {
             firstAngle = correctPhysicsForWalls(firstAngle, 180.0) + angle
             secondAngle = correctPhysicsForWalls(secondAngle, 0.0) + angle
-            if (y1 >= y2) {
-                val temp = firstAngle
-                firstAngle = secondAngle
-                secondAngle = temp
-            }
+        }
+
+
+        if (x1 < x2) {
+            val temp = firstAngle
+            firstAngle = secondAngle
+            secondAngle = temp
+
+        } else {
+            val temp = firstAngle
+            firstAngle = secondAngle
+            secondAngle = temp
 
 
         }

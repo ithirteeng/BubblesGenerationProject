@@ -14,10 +14,10 @@ import com.example.bubblesproject.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        const val BUBBLE_WIDTH = 400
-        const val BUBBLE_HEIGHT = 400
+        const val BUBBLE_WIDTH = 300
+        const val BUBBLE_HEIGHT = 300
         const val BUBBLES_AMOUNT = 20
-        const val DEFAULT_SPEED = 2
+        const val DEFAULT_SPEED = 5
     }
 
     private lateinit var binding: ActivityMainBinding
